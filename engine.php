@@ -34,6 +34,31 @@ class Response
 }
 
 if (isset($_REQUEST['getseed'])) {
+  getSeed();
+}else if (isset($_REQUEST['login'])){
+  login();
+}else if (isset($_REQUEST['verifypass'])) {
+  verifyPasscode();
+}else if (isset($_REQUEST['resendcode'])) {
+  resendCode();
+}else if (isset($_REQUEST['resetpwd'])) {
+  resetPwd();
+}else if (isset($_REQUEST['signup'])){
+  signup();
+}else if (isset($_REQUEST['canlogin'])){
+    try {
+        $db = new SQLite3('db/users.db', SQLITE3_OPEN_READWRITE);
+        if (!$db) {
+            echo '{"error":1}';
+        } else {
+            echo '{"error":0}';
+        }
+    }catch(Exception $exception){
+        echo '{"error":1}';
+    }
+}
+
+function getSeed() {
     $db = new SQLite3('db/users.db', SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE);
     if (!$db) {
         databaseError();
@@ -54,7 +79,8 @@ if (isset($_REQUEST['getseed'])) {
     $db->close();
     echo $response;
 }
-else if (isset($_REQUEST['login'])){
+
+function login() {
     $db = new SQLite3('db/users.db', SQLITE3_OPEN_READWRITE );
     if (!$db){
         databaseError();
@@ -109,7 +135,8 @@ else if (isset($_REQUEST['login'])){
         }
     }
 }
-else if (isset($_REQUEST['verifypass'])) {
+
+function verifyPasscode(){
     $db = new SQLite3('db/users.db', SQLITE3_OPEN_READWRITE );
     if (!$db)
         databaseError();
@@ -151,7 +178,8 @@ else if (isset($_REQUEST['verifypass'])) {
         }
     }
 }
-else if (isset($_REQUEST['resendcode'])) {
+
+function resendCode(){
     $db = new SQLite3('db/users.db', SQLITE3_OPEN_READWRITE );
     if (!$db)
         databaseError();
@@ -172,7 +200,8 @@ else if (isset($_REQUEST['resendcode'])) {
     $message = "A verification code was sent to your mobile phone number " . $maskPhoneNumber . ". Please enter the verification code to unlock your account.";
     sendSMSMessage($db, $result['phoneno'], $email, $message);
 }
-else if (isset($_REQUEST['resetpwd'])) {
+
+function resetPwd(){
     $db = new SQLite3('db/users.db', SQLITE3_OPEN_READWRITE );
     if (!$db)
         databaseError();
@@ -223,7 +252,8 @@ else if (isset($_REQUEST['resetpwd'])) {
         }
     }
 }
-else if (isset($_REQUEST['signup'])){
+
+function signup(){
     $db = new SQLite3('db/users.db', SQLITE3_OPEN_READWRITE | SQLITE3_OPEN_CREATE );
     if (!$db)
         databaseError();
@@ -249,18 +279,6 @@ else if (isset($_REQUEST['signup'])){
     }
     createResponse(new Response(OK, "Congratulations."));
 }
-else if (isset($_REQUEST['canlogin'])){
-    try {
-        $db = new SQLite3('db/users.db', SQLITE3_OPEN_READWRITE);
-        if (!$db) {
-            echo '{"error":1}';
-        } else {
-            echo '{"error":0}';
-        }
-    }catch(Exception $exception){
-        echo '{"error":2}';
-    }
-}
 
 function generateRandomCode($length) {
     $min = 10;
@@ -271,31 +289,36 @@ function generateRandomCode($length) {
     return mt_rand($min, $max);
 }
 
-function SendSMSMessage($db, $phoneno, $email, $message){
+function sendSMSMessage($db, $phoneno, $email, $message){
     $credentials = require('_credentials.php');
     $rcsdk = new SDK($credentials['appKey'], $credentials['appSecret'], $credentials['server'], '2FA Demo', '1.0.0');
     $platform = $rcsdk->platform();
-    $platform->login($credentials['username'], $credentials['extension'], $credentials['password']);
-    $code = generateRandomCode(6);
-    $myNumber = $credentials['username'];
     try {
-        $response = $platform->post('/account/~/extension/~/sms', array(
-            'from' => array('phoneNumber' => $myNumber),
-            'to' => array(array('phoneNumber' => $phoneno)),
-            'text' => "Your verification code is " . $code
-        ));
+      $platform->login($credentials['username'], $credentials['extension'], $credentials['password']);
+      $code = generateRandomCode(6);
+      $myNumber = $credentials['username'];
+      try {
+          $response = $platform->post('/account/~/extension/~/sms', array(
+              'from' => array('phoneNumber' => $myNumber),
+              'to' => array(array('phoneNumber' => $phoneno)),
+              'text' => "Your verification code is " . $code
+          ));
 
-        $status = $response->json()->messageStatus;
-        if ($status == "SendingFailed" || $status == "DeliveryFailed") {
-            $db->close();
-            createResponse(new Response(FAILED, "RC server connection error. Please try again."));
-        }else {
-            $timeStamp = time();
-            $query = "UPDATE users SET code= " . $code . ", codeexpiry= " . $timeStamp . " WHERE email='" . $email . "'";
-            $db->query($query);
-            $db->close();
-            createResponse(new Response(LOCKED, $message));
-        }
+          $status = $response->json()->messageStatus;
+          if ($status == "SendingFailed" || $status == "DeliveryFailed") {
+              $db->close();
+              createResponse(new Response(FAILED, "RC server connection error. Please try again."));
+          }else {
+              $timeStamp = time();
+              $query = "UPDATE users SET code= " . $code . ", codeexpiry= " . $timeStamp . " WHERE email='" . $email . "'";
+              $db->query($query);
+              $db->close();
+              createResponse(new Response(LOCKED, $message));
+          }
+      }catch (\RingCentral\SDK\Http\ApiException $e) {
+          $db->close();
+          createResponse(new Response(FAILED, "RC server connection error. Please try again."));
+      }
     }catch (\RingCentral\SDK\Http\ApiException $e) {
         $db->close();
         createResponse(new Response(FAILED, "RC server connection error. Please try again."));

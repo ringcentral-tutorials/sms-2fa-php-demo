@@ -9,7 +9,7 @@ function init() {
   var url = "engine.php?canlogin";
   $.get(url
   ).done(function(response){
-    if (response.error == 2){
+    if (response.error == 1){
       window.location.assign("signup.html")
     }
   }).fail(function(response){
@@ -58,9 +58,22 @@ function login(id, hashed){
     alert(JSON.stringify(response));
   });
 }
+
 function signup(){
   var url = "engine.php?signup";
   var temp = $("#password").val()
+  if (temp == ""){
+    alert("Missing password.")
+    return
+  }
+  if ($("#email").val() == ""){
+    alert("Missing email address.")
+    return
+  }
+  if ($("#phoneno").val() == ""){
+    alert("Missing phone number.")
+    return
+  }
   var hashed = CryptoJS.SHA256(temp, "").toString(CryptoJS.enc.Hex);
 
   var data = {
@@ -81,7 +94,6 @@ function signup(){
   }).fail(function(response){
     alert(response.responseText);
   });
-
 }
 
 function verifyPasscode() {
