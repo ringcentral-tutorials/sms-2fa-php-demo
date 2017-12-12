@@ -2,5 +2,5 @@
 /db/users.db
 .DS_Store
 _credentials.php
-_composer.phar
-_composer.lock
+composer.phar
+composer.lock
