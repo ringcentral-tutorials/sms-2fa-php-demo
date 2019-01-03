@@ -340,43 +340,7 @@ function sendSMSMessage($db, $phoneno, $email, $message){
       $db->close();
       createResponse(new Response(FAILED, "RC server connection error. Please try again."));
     }
-    /*
-    $credentials = require('_credentials.php');
-    $rcsdk = new SDK($credentials['appKey'], $credentials['appSecret'], $credentials['server'], '2FA Demo', '1.0.0');
-    $platform = $rcsdk->platform();
-    try {
-      $platform->login($credentials['username'], $credentials['extension'], $credentials['password']);
-      $code = generateRandomCode(6);
-      $myNumber = $credentials['username'];
-      try {
-          $response = $platform->post('/account/~/extension/~/sms', array(
-              'from' => array('phoneNumber' => $myNumber),
-              'to' => array(array('phoneNumber' => $phoneno)),
-              'text' => "Your verification code is " . $code
-          ));
-
-          $status = $response->json()->messageStatus;
-          if ($status == "SendingFailed" || $status == "DeliveryFailed") {
-              $db->close();
-              createResponse(new Response(FAILED, "RC server connection error. Please try again."));
-          }else {
-              $timeStamp = time();
-              $query = "UPDATE users SET code= " . $code . ", codeexpiry= " . $timeStamp . " WHERE email='" . $email . "'";
-              $db->query($query);
-              $db->close();
-              createResponse(new Response(LOCKED, $message));
-          }
-      }catch (\RingCentral\SDK\Http\ApiException $e) {
-          $db->close();
-          createResponse(new Response(FAILED, "RC server connection error. Please try again."));
-      }
-    }catch (\RingCentral\SDK\Http\ApiException $e) {
-        $db->close();
-        createResponse(new Response(FAILED, "RC server connection error. Please try again."));
-    }
-    */
 }
-
 function createResponse($res){
     $response= json_encode($res);
     echo $response;

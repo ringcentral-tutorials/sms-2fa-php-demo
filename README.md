@@ -28,17 +28,17 @@ To setup a free developer account, click [https://developer/ringcentral.com](her
 
 ### Clone - Setup - Run the project
 ```
-git clone https://github.com/ringcentral-tutorials/sms-2fa-php-demo
+$ git clone https://github.com/ringcentral-tutorials/sms-2fa-php-demo
 
-cd sms-2fa-php-demo
+$ cd sms-2fa-php-demo
 
 $ curl -sS https://getcomposer.org/installer | php
 
 $ php composer.phar install
 
-cp dotenv .env
+$ cp dotenv .env
 
-php -S localhost:5000
+$ php -S localhost:5000
 ```
 Remember to add your app client id and client secret as well as account login credentials to the .env file.
 
