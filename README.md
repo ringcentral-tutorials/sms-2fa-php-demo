@@ -26,20 +26,20 @@ To setup a free developer account, click [https://developer/ringcentral.com](her
 * Enter a new password and the verification code then click the Submit button to change the password.
 * Login with a new password.
 
-### Clone the project
+### Clone - Setup - Run the project
 ```
-git clone https://github.com/ringcentral-tutorials/2f-auth-php
+git clone https://github.com/ringcentral-tutorials/sms-2fa-php-demo
 
-cd 2f-auth-php
-```
-### Install composer
-```
+cd sms-2fa-php-demo
+
 $ curl -sS https://getcomposer.org/installer | php
-```
-More info about installation on [Linux / Unix / OSX](https://getcomposer.org/doc/00-intro.md#installation-linux-unix-osx) and [Windows](https://getcomposer.org/doc/00-intro.md#installation-windows).
 
+$ php composer.phar install
 
-### Run the Composer command to install the latest version of SDK
+cp dotenv .env
+
+php -S localhost:5000
 ```
-$ php composer.phar require ringcentral/ringcentral-php
-```
+Remember to add your app client id and client secret as well as account login credentials to the .env file.
+
+Open your Web browser and enter localhost:5000

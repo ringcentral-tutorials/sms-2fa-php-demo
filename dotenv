@@ -1,0 +1,13 @@
+ENVIRONMENT_MODE=sandbox
+CLIENT_ID_SB=YourSandboxClienId
+CLIENT_SECRET_SB=YourSandboxClienSecret
+
+USERNAME_SB=YourSandboxUsername
+PASSWORD_SB=YourSandboxPassword
+EXTENSION=
+
+CLIENT_ID_PROD=YourProductionClientId
+CLIENT_SECRET_PROD=YourProductionClientSecret
+
+USERNAME_PROD=YourProductionUsername
+PASSWORD_PROD=YourProductionPassword

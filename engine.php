@@ -2,16 +2,19 @@
 header("Content-Type: application/json", true);
 require_once('_bootstrap.php');
 use RingCentral\SDK\SDK;
+$dotenv = new Dotenv\Dotenv(__DIR__);
+$dotenv->load();
+
 define("OK", 0);
 define("FAILED", 1);
 define("LOCKED", 2);
 define("INVALID", 3);
 define("UNKNOWN", 4);
-define("MAX_FAILURE", 3);
+define("MAX_FAILURE", 2);
 
 class Seed
 {
-    public function Seed($error, $id, $seed)
+    function __construct($error, $id, $seed)
     {
         $this->error = $error;
         $this->id = $id;
@@ -24,7 +27,7 @@ class Seed
 
 class Response
 {
-    public function Response($error, $message)
+    function __construct($error, $message)
     {
         $this->error = $error;
         $this->message = $message;
@@ -290,6 +293,54 @@ function generateRandomCode($length) {
 }
 
 function sendSMSMessage($db, $phoneno, $email, $message){
+    $rcsdk = null;
+    if (getenv('ENVIRONMENT_MODE') == "sandbox") {
+        $rcsdk = new SDK(getenv('CLIENT_ID_SB'),
+            getenv('CLIENT_SECRET_SB'), RingCentral\SDK\SDK::SERVER_SANDBOX);
+    }else{
+        $rcsdk = new SDK(getenv('CLIENT_ID_PROD'),
+            getenv('CLIENT_SECRET_PROD'), RingCentral\SDK\SDK::SERVER_PRODUCTION);
+    }
+    $platform = $rcsdk->platform();
+    try {
+        $un = "";
+        $pwd = "";
+        if (getenv('ENVIRONMENT_MODE') == "sandbox"){
+            $username = getenv('USERNAME_SB');
+            $pwd = getenv('PASSWORD_SB');
+        }else{
+            $username = getenv('USERNAME_PROD');
+            $pwd = getenv('PASSWORD_PROD');
+        }
+        $platform->login($username, null, $pwd);
+        $code = generateRandomCode(6);
+        $myNumber = $username;
+        try {
+            $response = $platform->post('/account/~/extension/~/sms', array(
+                'from' => array('phoneNumber' => $myNumber),
+                'to' => array(array('phoneNumber' => $phoneno)),
+                'text' => "Your verification code is " . $code
+            ));
+            $status = $response->json()->messageStatus;
+            if ($status == "SendingFailed" || $status == "DeliveryFailed") {
+                $db->close();
+                    createResponse(new Response(FAILED, "RC server connection error. Please try again."));
+            }else {
+                $timeStamp = time();
+                $query = "UPDATE users SET code= " . $code . ", codeexpiry= " . $timeStamp . " WHERE email='" . $email . "'";
+                $db->query($query);
+                $db->close();
+                createResponse(new Response(LOCKED, $message));
+            }
+        }catch (\RingCentral\SDK\Http\ApiException $e) {
+            $db->close();
+            createResponse(new Response(FAILED, "RC server connection error. Please try again."));
+        }
+    }catch (\RingCentral\SDK\Http\ApiException $e) {
+      $db->close();
+      createResponse(new Response(FAILED, "RC server connection error. Please try again."));
+    }
+    /*
     $credentials = require('_credentials.php');
     $rcsdk = new SDK($credentials['appKey'], $credentials['appSecret'], $credentials['server'], '2FA Demo', '1.0.0');
     $platform = $rcsdk->platform();
@@ -323,6 +374,7 @@ function sendSMSMessage($db, $phoneno, $email, $message){
         $db->close();
         createResponse(new Response(FAILED, "RC server connection error. Please try again."));
     }
+    */
 }
 
 function createResponse($res){

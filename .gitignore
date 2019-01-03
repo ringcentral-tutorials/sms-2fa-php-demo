@@ -1,6 +1,6 @@
 /vendor
-/db/users.db
+db/users.db
 .DS_Store
-_credentials.php
+.env
 composer.phar
 composer.lock

@@ -1,5 +1,6 @@
 {
     "require": {
-        "ringcentral/ringcentral-php": "^2.1"
+        "ringcentral/ringcentral-php": "^2.1",
+        "vlucas/phpdotenv": "^2.5.0"
     }
 }
