@@ -43,3 +43,6 @@ $ php -S localhost:5000
 Remember to add your app client id and client secret as well as account login credentials to the .env file.
 
 Open your Web browser and enter localhost:5000
+
+## RingCentral PHP SDK
+The SDK is available at https://github.com/ringcentral/ringcentral-php
