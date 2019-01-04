@@ -1,5 +1,4 @@
 /vendor
-db/users.db
 .DS_Store
 .env
 composer.phar
