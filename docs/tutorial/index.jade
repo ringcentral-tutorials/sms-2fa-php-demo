@@ -32,17 +32,22 @@
 
   .step(data-title='Set environment', data-file='../dotenv')
     :markdown
-      ### Set environment parameters and run the demo
+      ### Set environment parameters
       ```
       $ cp dotenv .env
       ```
       Add your app client id and client secret as well as account login credentials to the .env file.
       * __Note__: The username is the account number and it is also the phone number we will use to send SMS from. If you want to use another number under this account, you can create a new variable and specify the phone number and use that number for sending SMS instead.
 
+      ### Run the demo
       ```
       $ php -S localhost:5000
       ```
       Open your Web browser and enter localhost:5000
+
+      To see how it works, signup to create a new user account. Then login with a wrong password for 3 times. Or click the Reset password link.
+
+      If you login successfully, it will just launch the about page.
 
   .step(data-title='Web pages and client JavaScript', data-file='../about.html', data-highlight='1-75')
     :markdown
